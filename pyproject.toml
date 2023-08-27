@@ -1,10 +1,16 @@
 [tool.poetry]
 name = "tidi"
-version = "0.0.1"
+version = "0.1.0"
 description = "A lightweight dependency injection library"
 authors = ["Sam Patterson <no@emails.please>"]
 license = "MIT"
 readme = "README.md"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent"
+]
 packages = [{ include = "tidi", from = "src" }]
 
 [tool.poetry.dependencies]
@@ -15,10 +21,24 @@ pytest = "^7.4.0"
 pre-commit = "^3.3.3"
 pytest-cov = "^4.1.0"
 pytest-mock = "^3.11.1"
+commitizen = "^3.7.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_files = [
+    "VERSION",
+    "pyproject.toml:^version",
+    "src/tidi/__init__.py:^__version",
+    ]
+update_changelog_on_bump = true
+changelog_incremental = true
+bump_message = "bump: $current_version → $new_version"
+
 
 [tool.black]
 line-length = 100

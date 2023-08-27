@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "tidi"
+version = "0.0.1"
+description = "A lightweight dependency injection library"
+authors = ["Sam Patterson <no@emails.please>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "tidi", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pre-commit = "^3.3.3"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.11.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 120

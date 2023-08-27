@@ -21,10 +21,24 @@ pytest = "^7.4.0"
 pre-commit = "^3.3.3"
 pytest-cov = "^4.1.0"
 pytest-mock = "^3.11.1"
+commitizen = "^3.7.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_files = [
+    "VERSION",
+    "pyproject.toml:^version",
+    "src/tidi/__init__.py:^__version",
+    ]
+update_changelog_on_bump = true
+changelog_incremental = true
+bump_message = "bump: $current_version → $new_version"
+
 
 [tool.black]
 line-length = 100

@@ -1,4 +1,4 @@
-""""""
+"""Finds or creates dependency instances based on availability and options."""
 
 import typing as t
 from dataclasses import dataclass
@@ -17,6 +17,14 @@ class DependencyResolutionError(Exception):
 
 @dataclass(frozen=True)
 class ResolverOptions:
+    """Options that control how resolving is done.
+
+    Args:
+        use_registry (bool): whether to try using the registry or not.
+        initialise_missing (bool): whether to try to initialise the dependency or not.
+
+    """
+
     use_registry: bool
     initialise_missing: bool
 
@@ -27,7 +35,24 @@ def resolve_dependency(
     registry: Registry | None = None,
     provider: t.Callable[..., T] | None = None,
 ) -> T:
-    """Returns a dependency according to configured options."""
+    """Returns a dependency according to configured options.
+
+    Args:
+        type_ (typing.Type[T]): the type of the dependency being looked for.
+        resolver_options (ResolverOptions): options dictating how to resolve
+            the dependency.
+        registry (Registry | None, optional): an optional registry containing
+            the dependency. Defaults to None.
+        provider (typing.Callable[..., T] | None, optional): an optional
+            function that will return the dependency. Defaults to None.
+
+    Raises:
+        DependencyResolutionError: if a registry is required but not provided
+        DependencyResolutionError: if the function doesn't know how to handle the situation
+
+    Returns:
+        (type requested (T)): an instance of the dependency requested.
+    """
     match resolver_options:
         case ResolverOptions(use_registry=True, initialise_missing=False) if registry is not None:
             return registry.get(type_)

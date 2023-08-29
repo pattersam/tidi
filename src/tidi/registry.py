@@ -1,4 +1,4 @@
-"""Provides the main `Tidi` class, housing the dependency registry and @inject decorator"""
+"""Provides a `TidiRegistry`, responsible for providing stored dependencies."""
 
 import builtins
 import typing as t
@@ -7,7 +7,7 @@ T = t.TypeVar("T")
 
 
 class _Unknown:
-    """Sentinal class / objected used to represent no default selection."""
+    ...  # pragma: no cover
 
 
 _unknown = _Unknown()
@@ -33,14 +33,33 @@ class TidiRegistry:
         self._registry: dict = {}
 
     def register(self, obj: t.Any):
-        """Register an instance `obj` of class `T` to be available for injection."""
+        """Register an instance `obj` of class `T` to be available for injection.
+
+        Args:
+            obj (typing.Any): The instance to register
+
+        Raises:
+            RegistrationError: if trying to register a banned type (a builtin type by default).
+        """
         type_ = type(obj)
         if type_ in self.banned_types:
             raise RegistrationError(f"Trying to register a banned type: {type_}")
         self._registry[type_] = obj
 
     def get(self, type_: t.Type[T], default: t.Any = _unknown) -> T:
-        """Get an object from the regsitry, optionally try to instantiate it if it isn't registered."""
+        """Get an instance of type `type_` from the regsitry.
+
+        Args:
+            type_ (t.Type[T]): The type of the dependency being looked for.
+            default (t.Any, optional): An optional default return value.
+
+        Raises:
+            RegistryLookupError: if the instance hasn't been registered and a
+                default hasn't been provided.
+
+        Returns:
+            (type_ (T)): the registered object, or default value if it was provided.
+        """
         obj = self._registry.get(type_, default)
         if isinstance(obj, _Unknown):
             raise RegistryLookupError(f"Type has not been registered: {type_}")

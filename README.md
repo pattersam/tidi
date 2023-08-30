@@ -117,8 +117,11 @@ When testing,
 
 ### More examples
 
-See the [Usage documentation](https://pattersam.github.io/tidi/usage/) for more
-examples of how Tidi can be used.
+You can find some executable examples in the [demo/](https://github.com/pattersam/tidi/tree/main/demo)
+directory of the repo.
+
+Also see the [Usage documentation](https://pattersam.github.io/tidi/usage/) for
+more examples.
 
 ## Interested in contributing?
 

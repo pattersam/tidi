@@ -63,6 +63,7 @@ jobs:
       url: https://pypi.org/p/tidi
     permissions:
       id-token: write
+      contents: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -79,4 +80,4 @@ jobs:
       - name: Set up git user
         run: git config user.name 'github-actions[bot]' && git config user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Deploy mkdocs to github pages
-        run: poetry run mkdocs gh-deploy
+        run: poetry run mkdocs gh-deploy --force

@@ -59,8 +59,8 @@ jobs:
     needs: pypi-publish
     runs-on: ubuntu-latest
     environment:
-      name: pypi
-      url: https://pypi.org/p/tidi
+      name: docs
+      url: https://pattersam.github.io/tidi/
     permissions:
       id-token: write
       contents: write

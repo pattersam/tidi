@@ -32,6 +32,7 @@ import tidi
 def get_secret() -> str:
     return "wshwshwhswhs"
 
+@tidi.inject
 def run(secret: tidi.Injected[str] = tidi.Provider(get_secret)):
     logger.info(f"don't tell anyone this but, {secret}")
 
@@ -44,19 +45,19 @@ if __name__ == "__main__":
 ``` py
 import tidi
 
-class Database():
+class SnackRepo():
     def __init__(self, db_string = "fridge"):
         self.db_string = db_string
 
     def get_snack(self):
         return f"snack, out of the {self.db_string}"
 
-def eat_snack(db: tidi.Injected[Database] = tidi.Provider(Database)):
-    logger.info(f"eating {db.get_snack()}")
+@tidi.inject
+def eat_snack(repo: tidi.Injected[SnackRepo] = tidi.Provider(SnackRepo)):
+    logger.info(f"eating {repo.get_snack()}")
 
 if __name__ == "__main__":
-    eat_snack()  # 🪄 a new `Database` injected into `run` ✨
-
+    eat_snack()  # 🪄 a new `SnackRepo` injected into `run` ✨
 ```
 
 ### The injection also works with classes, either into the constructor
@@ -88,17 +89,19 @@ class Job:
         self.name = name
 
     @tidi.inject
-    def run(self, db: tidi.Injected[DBConn] = tidi.Provided(get_db_conn)):
+    def run(self, db: tidi.Injected[DBConnection] = tidi.Provider(get_db_conn)):
         logger.info(f"run job {self.name} using database {db.name}")
 
-if __name__ == "__main__:
+if __name__ == "__main__":
     job = Job("new job")
-    job.run()  # 🪄 `DBConn` injected into `job.run` ✨
+    job.run()  # 🪄 `DBConnection` injected into `job.run` ✨
 ```
 
 ### And to inject dependencies into a dataclass, use the field_factory
 
 ``` py
+from dataclasses import dataclass, field
+
 import tidi
 
 @dataclass
@@ -106,11 +109,11 @@ class Output:
     value: float
     created_by: User = field(default_factory=tidi.field_factory(User))
 
-def process():
+def process_next_job():
     return Output(value=1)  # 🪄 `User` injected into `Output.created_by` ✨
 
 if __name__ == "__main__":
     current_user = User.from_env_credentials()
     tidi.register(current_user)
-    output = process(job)
+    output = process_next_job()
 ```

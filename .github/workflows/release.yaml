@@ -65,6 +65,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
@@ -74,6 +76,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry install
           poetry install
-      - name: Test with pytest
-        run: |
-          poetry run mkdocs gh-deploy
+      - name: Set up git user
+        run: git config user.name 'github-actions[bot]' && git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Deploy mkdocs to github pages
+        run: poetry run mkdocs gh-deploy

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tidi"
-version = "0.1.2.dev8"
+version = "0.1.2"
 description = "A small dependency injection Python library"
 authors = ["Sam Patterson <no@emails.please>"]
 license = "MIT"
@@ -42,7 +42,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.1.2.dev8"
+version = "0.1.2"
 tag_format = "v$version"
 version_files = [
     "VERSION",

@@ -36,12 +36,12 @@ database = load_database()
 tidi.register(database)
 ```
 
-This puts it into the _default_ registry which is shared across 
+This puts it into the _default_ registry which is shared across
 
 See the [`tidi.registry`](./registry.md) documentation for more detail.
 
 
-### `tidi.Provider`  
+### `tidi.Provider`
 
 For more control over what instance is injected, use the provider function.
 

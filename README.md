@@ -34,17 +34,17 @@ Read more about the motivation in [this Medium article](https://medium.com/@patt
 The top level import of `tidi` provides everything needed it's primary intended
 use.
 
-- `@tidi.inject` - a decorator that will replace certain keyword arguments 
+- `@tidi.inject` - a decorator that will replace certain keyword arguments
   with dependencies, based on their type & if they haven't been passed in
 - `tidi.Injected[DependencyClass]` - a type alias, wrapping typing.Annotated,
   that indicates that a keyword argument should be injected
 - `tidi.register(dependency_instance)` - a function that registers an object to
   be available for injection as a dependency
-- `tidi.Provider(get_dependency_function)` - a wrapper class around a function 
+- `tidi.Provider(get_dependency_function)` - a wrapper class around a function
   that will be called to provide a dependency
 - `tidi.UNSET` - a sentinel object to indicate that a dependency should be
   loaded from the registry
-- `tidi.field_factory(DependencyClass)` - a helper function for injecting 
+- `tidi.field_factory(DependencyClass)` - a helper function for injecting
   dependencies into dataclass fields
 
 ## Example of use
@@ -112,7 +112,7 @@ and obey the Law of Demeter.
 
 When testing,
 
-* a mock `Handbag` could be passed in as a keyword argument to test 
+* a mock `Handbag` could be passed in as a keyword argument to test
   `dig_through_handbag`, and
 * patching `dig_through_handbag` with a stub could be done to test `run_search`
   with no requirement for a mock `Handbag`.

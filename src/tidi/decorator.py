@@ -27,6 +27,7 @@ class Unset(t.Any):
 UNSET = Unset()
 """Sentinel `Unset` object used to indicate a kwarg is not set yet."""
 
+
 class Provider(t.Generic[T], t.Any):  # inherit from Any to appease type checkers
     """Wrapper class around a function that will be called to provide a dependency
 
@@ -38,18 +39,19 @@ class Provider(t.Generic[T], t.Any):  # inherit from Any to appease type checker
         Define a provider function
         >>> def get_big_toolbox() -> Toolbox:
         >>>     return ...
-        
+
         Give the provider function into the kwarg marked for injected
         >>> @tidi.inject
         ... def get_hammers(
         ...     toolbox: tidi.Injected[Toolbox] = tidi.Provider(get_big_toolbox)
         ... ) -> list[Hammer]:
         ...     return [tool for tool in toolbox.tools if isinstance(tool, Hammer)]
-        
+
         Now when you call `get_hammers`, Tidi will call `get_big_toolbox` and
         inject it into the `toolbox` kwarg
         >>> get_hammers()
     """
+
     # overloading new to avoid issue with the `Any` inheritance
     @classmethod
     def __new__(cls, *args, **kwargs) -> t.Self:
@@ -74,7 +76,7 @@ def inject(registry: Registry | None = None) -> t.Callable[[t.Callable[P, R]], t
         package defined one.
         >>> # note: `new_injector` doesn't have a registry, which can be useful
         >>> new_injector = tidi.decorator.inject()
-        
+
         Use the decorator just like the main one (`tidi.inject`)
         >>> @new_injector
         >>> def create_db_connection(

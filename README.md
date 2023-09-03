@@ -1,4 +1,4 @@
-# tidi
+# Tidi
 
 <p>
 <a href="https://github.com/pattersam/tidi/actions?query=workflow%3ATest+event%3Apush+branch%3Amain" target="_blank">
@@ -24,8 +24,10 @@ Inspired by [Kent Tong's](https://github.com/freemant2000)
 ## Motivation
 
 I found myself wanting to learn more about how dependency injection can be done
-in a pythonic way, with type-hinting, so had the itch to develop (yet another) 
+in a _pythonic_ way, with type-hinting, so had the itch to develop (yet another)
 library for it and share it as open source 🧑‍💻✌️
+
+Read more about the motivation in [this Medium article](https://medium.com/@pattersam/introducing-tidi-a-small-dependency-injection-python-library-c6fd17a26ab).
 
 ## Primary API
 

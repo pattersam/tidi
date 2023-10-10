@@ -1,3 +1,9 @@
+## v0.1.3 (2023-10-10)
+
+### Fix
+
+- make registry thread safe
+
 ## v0.1.2 (2023-09-02)
 
 Added [documentation](https://pattersam.github.io/tidi/usage/) and refine CICD

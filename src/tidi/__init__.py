@@ -3,7 +3,7 @@ import typing as t
 
 from tidi import decorator, registry, resolver
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 T = t.TypeVar("T")
 

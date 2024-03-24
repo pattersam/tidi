@@ -117,6 +117,26 @@ def test_injecting_into_func_from_subclass():
     assert my_func("👋") == "hello child 👋"
 
 
+def test_injecting_into_func_from_subclass_doesnt_work_when_type_kwarg_not_specified():
+    class ParentClassDependency:
+        def __init__(self):
+            self.value = "hello parent"
+
+    class ChildClassDependency:
+        def __init__(self):
+            self.value = "hello child"
+
+    @tidi.inject
+    def my_func(a: str, b: tidi.Injected[ParentClassDependency] = tidi.UNSET) -> str:
+        return f"{b.value} {a}"
+
+    dependency = ChildClassDependency()
+    tidi.register(dependency)
+
+    assert my_func("👋") != "hello child 👋"
+    assert my_func("👋") == "hello parent 👋"
+
+
 def test_injecting_into_func_from_subclass_fails_when_not_specified():
     class ParentClassDependency:
         def __init__(self, value: str):

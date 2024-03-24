@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
 
+import pytest
+
 import tidi
 
 
@@ -113,3 +115,23 @@ def test_injecting_into_func_from_subclass():
     tidi.register(dependency, type_=ParentClassDependency)
 
     assert my_func("👋") == "hello child 👋"
+
+
+def test_injecting_into_func_from_subclass_fails_when_not_specified():
+    class ParentClassDependency:
+        def __init__(self, value: str):
+            self.value = f"{value} parent"
+
+    class ChildClassDependency:
+        def __init__(self, value: str):
+            self.value = f"{value} child"
+
+    @tidi.inject
+    def my_func(a: str, b: tidi.Injected[ParentClassDependency] = tidi.UNSET) -> str:
+        return f"{b.value} {a}"
+
+    dependency = ChildClassDependency("hello")
+    tidi.register(dependency)
+
+    with pytest.raises(tidi.resolver.DependencyResolutionError):
+        my_func("👋")

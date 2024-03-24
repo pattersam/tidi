@@ -91,7 +91,7 @@ def test_resolve_dependency_from_registry_or_init_without_dep_in_registry_from_p
 
 def test_resolve_dependency_from_registry_or_init_without_dep_in_registry_unable_to_create():
     # `case ResolverOptions(use_registry=True, initialise_missing=True) if registry is not None`
-    with pytest.raises(TypeError):
+    with pytest.raises(resolver.DependencyResolutionError):
         resolver.resolve_dependency(
             DepWithArgs,
             resolver.ResolverOptions(use_registry=True, initialise_missing=True),
@@ -121,7 +121,7 @@ def test_resolve_dependency_init_only_from_provider():
 
 def test_resolve_dependency_init_only_unable_to_create():
     # `case ResolverOptions(use_registry=True, initialise_missing=True) if registry is not None`
-    with pytest.raises(TypeError):
+    with pytest.raises(resolver.DependencyResolutionError):
         resolver.resolve_dependency(
             DepWithArgs,
             resolver.ResolverOptions(use_registry=False, initialise_missing=True),

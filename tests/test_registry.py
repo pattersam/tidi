@@ -35,6 +35,35 @@ def test_register_dataclass(tidi_registry: registry.TidiRegistry):
     assert tidi_registry.get(TestDataClass).default_field == 2
 
 
+def test_register_inheritted_class_without_specifying_type_key_fails(
+    tidi_registry: registry.TidiRegistry,
+):
+    class ParentClass:
+        ...
+
+    class ChildClass(ParentClass):
+        ...
+
+    obj = ChildClass()
+    tidi_registry.register(obj)
+    with pytest.raises(registry.RegistryLookupError):
+        tidi_registry.get(ParentClass)
+
+
+def test_register_inheritted_class_with_specifying_type_key_fails(
+    tidi_registry: registry.TidiRegistry,
+):
+    class ParentClass:
+        ...
+
+    class ChildClass(ParentClass):
+        ...
+
+    obj = ChildClass()
+    tidi_registry.register(obj, type_=ParentClass)
+    assert tidi_registry.get(ParentClass) == obj
+
+
 def test_register_str_subclass(tidi_registry: registry.TidiRegistry):
     class MyString(str):
         ...

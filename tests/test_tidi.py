@@ -94,3 +94,22 @@ def test_injecting_into_func_from_initialised_class():
         return f"{a} {b.value}"
 
     assert my_func("hello") == "hello class world"
+
+
+def test_injecting_into_func_from_subclass():
+    class ParentClassDependency:
+        def __init__(self, value: str):
+            self.value = f"{value} parent"
+
+    class ChildClassDependency:
+        def __init__(self, value: str):
+            self.value = f"{value} child"
+
+    @tidi.inject
+    def my_func(a: str, b: tidi.Injected[ParentClassDependency] = tidi.UNSET) -> str:
+        return f"{b.value} {a}"
+
+    dependency = ChildClassDependency("hello")
+    tidi.register(dependency, type_=ParentClassDependency)
+
+    assert my_func("👋") == "hello child 👋"

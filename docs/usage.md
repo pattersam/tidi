@@ -23,6 +23,26 @@ if __name__ == "__main__":
     run()  # 🪄 `AuthService` injected into `run` ✨
 ```
 
+### Objects can be registered & retrieved via their abstractions
+
+``` py
+import tidi
+
+@tidi.inject
+def watch(content: tidi.Injected[MediaABC] = tidi.UNSET):
+    content.play()  # `MediaABC` interface used by type checkers 🤝
+    ...
+
+if __name__ == "__main__":
+    # register a `Film` object to be accessed as an abstract `MediaABC` type
+    django_unchained = Film(isan="0000-0003-6795-0000-O-0000-0000-2")
+    tidi.register(django_unchained, type_=MediaABC)
+
+    ...
+
+    watch()  # 🪄 `django_unchained` injected into `watch` ✨
+```
+
 
 ### Inject a dependency provided by a function
 

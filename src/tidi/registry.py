@@ -23,7 +23,7 @@ class RegistryLookupError(LookupError):
 
 
 class _Container(t.Protocol):
-    def add(self, obj: T):
+    def add(self, obj: T, type_: t.Type[T]):
         ...  # pragma: no cover
 
     def get(self, type_: t.Type[T], default: T | None = None) -> T:
@@ -34,8 +34,8 @@ class _PerThreadContainer(threading.local):
     def __init__(self):
         self._map = {}
 
-    def add(self, obj: T):
-        self._map[type(obj)] = obj
+    def add(self, obj: T, type_: t.Type[T]):
+        self._map[type_] = obj
 
     def get(self, type_: t.Type[T], default: T | None = None) -> T:
         return self._map.get(type_, default)
@@ -56,19 +56,21 @@ class TidiRegistry:
         self.banned_types = banned_types
         self._container = container_cls()
 
-    def register(self, obj: t.Any):
+    def register(self, obj: T, type_: t.Type[T] | None = None):
         """Register an instance `obj` of class `T` to be available for injection.
 
         Args:
             obj (typing.Any): The instance to register
 
+
         Raises:
             RegistrationError: if trying to register a banned type (a builtin type by default).
         """
-        type_ = type(obj)
+        if type_ is None:
+            type_ = type(obj)
         if type_ in self.banned_types:
             raise RegistrationError(f"Trying to register a banned type: {type_}")
-        self._container.add(obj)
+        self._container.add(obj, type_)
 
     def get(self, type_: t.Type[T], default: t.Any = _unknown) -> T:
         """Get an instance of type `type_` from the regsitry.

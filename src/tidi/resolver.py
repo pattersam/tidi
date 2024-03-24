@@ -68,5 +68,12 @@ def resolve_dependency(
 
 def _initialise_dependency(type_: t.Type[T], provider: t.Callable[..., T] | None) -> T:
     if provider is None:
-        return type_()
+        return _new_dependency(type_)
     return provider()
+
+
+def _new_dependency(type_: t.Type[T]) -> T:
+    try:
+        return type_()
+    except TypeError as err:
+        raise DependencyResolutionError(f"Unable to instantiate {type_}") from err

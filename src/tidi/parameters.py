@@ -44,7 +44,7 @@ class AnnotatedParameter(inspect.Parameter):
         return t.get_origin(self.annotation) is t.Annotated
 
     @property
-    def base_type(self) -> t.Type:  # type: ignore
+    def base_type(self) -> t.Type:
         """The _real_ type of the `typing.Annotated` parameter."""
         assert self.is_annotated_type
         match t.get_args(self.annotation)[0]:
@@ -52,6 +52,7 @@ class AnnotatedParameter(inspect.Parameter):
                 return t.get_args(union)[0]
             case base_type:
                 return base_type
+        t.assert_never(self.annotation)
 
     @property
     def annotated_metadata(self) -> tuple:

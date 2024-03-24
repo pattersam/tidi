@@ -26,5 +26,5 @@ poetry run cz bump
 git push && git push --tags
 ```
 
-Then make a [new release](https://github.com/pattersam/tidi/releases/new) in
-Github from the new version tag.
+Then make a new release from the
+[newly authored version tag](https://github.com/pattersam/tidi/tags).

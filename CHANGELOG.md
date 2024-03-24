@@ -1,3 +1,10 @@
+## v0.2.0 (2024-03-24)
+
+### Feat
+
+- more explicit exception when initialising a new dependency
+- allow specifying exact type to register a dependency with
+
 ## v0.1.3 (2023-10-10)
 
 ### Fix

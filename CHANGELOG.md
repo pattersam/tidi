@@ -1,3 +1,9 @@
+## v0.3.0 (2024-06-19)
+
+### Feat
+
+- allow use of context managers in `tidi.Provider`
+
 ## v0.2.0 (2024-03-24)
 
 ### Feat

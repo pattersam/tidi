@@ -1,5 +1,6 @@
 """Finds or creates dependency instances based on availability and options."""
 
+import contextlib
 import typing as t
 from dataclasses import dataclass
 
@@ -29,12 +30,15 @@ class ResolverOptions:
     initialise_missing: bool
 
 
+@contextlib.contextmanager
 def resolve_dependency(
     type_: t.Type[T],
     resolver_options: ResolverOptions,
     registry: Registry | None = None,
-    provider: t.Callable[..., T] | None = None,
-) -> T:
+    provider: t.Callable[..., T]
+    | t.Callable[..., contextlib.AbstractContextManager[T]]
+    | None = None,
+) -> t.Iterator[T]:
     """Returns a dependency according to configured options.
 
     Args:
@@ -43,8 +47,9 @@ def resolve_dependency(
             the dependency.
         registry (Registry | None, optional): an optional registry containing
             the dependency. Defaults to None.
-        provider (typing.Callable[..., T] | None, optional): an optional
-            function that will return the dependency. Defaults to None.
+        provider: (t.Callable[..., T] | typing.Callable[..., contextlib.AbstractContextManager[T]] | None):
+            an optional context manager function that returns the dependency.
+            Defaults to None.
 
     Raises:
         DependencyResolutionError: if a registry is required but not provided
@@ -55,21 +60,35 @@ def resolve_dependency(
     """
     match resolver_options:
         case ResolverOptions(use_registry=True, initialise_missing=False) if registry is not None:
-            return registry.get(type_)
+            yield registry.get(type_)
         case ResolverOptions(use_registry=True, initialise_missing=False) if registry is None:
             raise DependencyResolutionError("Registry required but not provided.")
         case ResolverOptions(use_registry=True, initialise_missing=True) if registry is not None:
             obj = registry.get(type_, None)
-            return obj if obj is not None else _initialise_dependency(type_, provider)
+            if obj is not None:
+                yield obj
+            else:
+                yield from _initialise_dependency(type_, provider)
         case ResolverOptions(initialise_missing=True) if registry is None:
-            return _initialise_dependency(type_, provider)
-    raise DependencyResolutionError("Unable to resolve dependency.")
+            yield from _initialise_dependency(type_, provider)
+        case _:
+            raise DependencyResolutionError("Unable to resolve dependency.")
 
 
-def _initialise_dependency(type_: t.Type[T], provider: t.Callable[..., T] | None) -> T:
+def _initialise_dependency(
+    type_: t.Type[T],
+    provider: t.Callable[..., contextlib.AbstractContextManager[T]] | t.Callable[..., T] | None,
+) -> t.Iterator[T]:
     if provider is None:
-        return _new_dependency(type_)
-    return provider()
+        yield _new_dependency(type_)
+        return
+    maybe_a_context_manager = provider()
+    match maybe_a_context_manager:
+        case contextlib.AbstractContextManager() as context_manager:
+            with context_manager as obj:
+                yield obj
+        case obj:
+            yield obj
 
 
 def _new_dependency(type_: t.Type[T]) -> T:

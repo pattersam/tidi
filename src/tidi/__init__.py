@@ -24,9 +24,13 @@ inject = decorator.inject(registry=default_tidi_registry)
 def field_factory(
     type_: t.Type[T], provider: t.Callable[..., T] | None = None
 ) -> t.Callable[..., T]:
-    return lambda: resolver.resolve_dependency(
-        type_=type_,
-        resolver_options=DEFAULT_RESOLVER_OPTIONS,
-        registry=default_tidi_registry,
-        provider=provider,
-    )
+    def inner():
+        with resolver.resolve_dependency(
+            type_=type_,
+            resolver_options=DEFAULT_RESOLVER_OPTIONS,
+            registry=default_tidi_registry,
+            provider=provider,
+        ) as obj:
+            return obj
+
+    return inner

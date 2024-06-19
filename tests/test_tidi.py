@@ -1,3 +1,5 @@
+import contextlib
+import typing as t
 from dataclasses import dataclass, field
 
 import pytest
@@ -81,6 +83,43 @@ def test_injecting_into_func_from_func():
 
     @tidi.inject
     def my_func(a: str, b: tidi.Injected[LoadedDependency] = tidi.Provider(load_dependency)) -> str:
+        return f"{a} {b}"
+
+    assert my_func("hello") == "hello loaded world"
+
+
+def test_injecting_into_func_from_decorator_context_manager():
+    class LoadedDependency(str):
+        ...
+
+    @contextlib.contextmanager
+    def dependency_ctx_mgr() -> t.Iterator[LoadedDependency]:
+        yield LoadedDependency("loaded world")
+
+    @tidi.inject
+    def my_func(
+        a: str, b: tidi.Injected[LoadedDependency] = tidi.Provider(dependency_ctx_mgr)
+    ) -> str:
+        return f"{a} {b}"
+
+    assert my_func("hello") == "hello loaded world"
+
+
+def test_injecting_into_func_from_class_context_manager():
+    class LoadedDependency(str):
+        ...
+
+    class DependencyContextManager:
+        def __enter__(self):
+            return LoadedDependency("loaded world")
+
+        def __exit__(self, *_):
+            ...
+
+    @tidi.inject
+    def my_func(
+        a: str, b: tidi.Injected[LoadedDependency] = tidi.Provider(DependencyContextManager)
+    ) -> str:
         return f"{a} {b}"
 
     assert my_func("hello") == "hello loaded world"

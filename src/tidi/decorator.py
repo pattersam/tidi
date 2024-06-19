@@ -4,6 +4,7 @@ Uses `tidi.parameters` to determine which parameters of the wrapped function to
 replace.
 """
 
+import contextlib
 import functools
 import inspect
 import typing as t
@@ -33,14 +34,15 @@ class Provider(t.Generic[T], t.Any):  # inherit from Any to appease type checker
 
     Args:
         provider_func (typing.Callable): Callable that will return a given
-            type (TypeVar `T`) which will be used as the dependency.
+            type (TypeVar `T`) which will be used as the dependency, or that
+            is a context manager that provides `T`.
 
     Examples:
-        Define a provider function
+        Define a provider as a plain function
         >>> def get_big_toolbox() -> Toolbox:
-        >>>     return ...
+        ...     return ...
 
-        Give the provider function into the kwarg marked for injected
+        Give the provider function into the kwarg marked for injection
         >>> @tidi.inject
         ... def get_hammers(
         ...     toolbox: tidi.Injected[Toolbox] = tidi.Provider(get_big_toolbox)
@@ -50,6 +52,28 @@ class Provider(t.Generic[T], t.Any):  # inherit from Any to appease type checker
         Now when you call `get_hammers`, Tidi will call `get_big_toolbox` and
         inject it into the `toolbox` kwarg
         >>> get_hammers()
+
+        Or, define a provider as a context manager
+        >>> @contextlib.contextmanager
+        ... def wear_invisibility_cloak() -> t.Iterator[InvisibilityCloak]:
+        ...     cloak = get_cloak()
+        ...     cloak.activate()
+        ...     try:
+        ...         yield cloak
+        ...     finally:
+        ...         cloak.deactivate()
+
+        Give that provider context manager into the kwarg marked for injection
+        >>> @tidi.inject
+        ... def investigate_crime(
+        ...     cloak: tidi.Injected[InvisibilityCloak] = tidi.Provider(wear_invisibility_cloak)
+        ... ) -> Evidence | None:
+        ...     enter_crime_scene(cloak)
+        ...     return search_crime_scene_for_evidence(cloak)
+
+        Now when you call `investigate_crime`, Tidi will enter the `wear_invisibility_cloak`
+        context manager and inject a the `InvisibilityCloak` into the `cloak` kwarg
+        >>> investigate_crime()
     """
 
     # overloading new to avoid issue with the `Any` inheritance
@@ -57,7 +81,10 @@ class Provider(t.Generic[T], t.Any):  # inherit from Any to appease type checker
     def __new__(cls, *args, **kwargs) -> t.Self:
         return super().__new__(cls)
 
-    def __init__(self, provider_func: t.Callable[..., T]):
+    def __init__(
+        self,
+        provider_func: t.Callable[..., T] | t.Callable[..., contextlib.AbstractContextManager[T]],
+    ):
         self.provider_func = provider_func
 
 
@@ -90,17 +117,25 @@ def inject(registry: Registry | None = None) -> t.Callable[[t.Callable[P, R]], t
 
         @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-            for param in injectable_params:
-                obj = resolver.resolve_dependency(
-                    type_=param.base_type,
-                    resolver_options=next(metadata for metadata in param.annotated_metadata),
-                    registry=registry,
-                    provider=param.default.provider_func
-                    if isinstance(param.default, Provider)
-                    else None,
-                )
-                kwargs.setdefault(param.name, obj)
-            return func(*args, **kwargs)
+            with contextlib.ExitStack() as stack:
+                for param in injectable_params:
+                    obj = stack.enter_context(
+                        resolver.resolve_dependency(
+                            type_=param.base_type,
+                            resolver_options=next(
+                                metadata for metadata in param.annotated_metadata
+                            ),
+                            registry=registry,
+                            provider=(
+                                param.default.provider_func
+                                if isinstance(param.default, Provider)
+                                else None
+                            ),
+                        )
+                    )
+                    kwargs.setdefault(param.name, obj)
+                return func(*args, **kwargs)
+            assert False, "unreachable"  # pragma: no cover, to appease mypy with ExitStack
 
         return wrapper
 

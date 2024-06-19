@@ -29,7 +29,7 @@ class FakeResolverOptions:
 @pytest.fixture
 def mock_resolver(mocker: pytest_mock.MockerFixture) -> t.Callable:
     mock_resolver = mocker.patch("tidi.resolver.resolve_dependency")
-    mock_resolver.return_value = TEST_DEP
+    mock_resolver.return_value.__enter__.return_value = TEST_DEP
     return mock_resolver
 
 

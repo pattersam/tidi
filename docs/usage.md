@@ -60,6 +60,30 @@ if __name__ == "__main__":
     run()  # 🪄 result from `get_secret()` injected into `run` ✨
 ```
 
+### Inject a dependency provided by a context manager
+
+``` py
+import contextlib
+import typing as t
+
+import tidi
+
+@contextlib.contextmanager
+def open_sesame() -> t.Iterator[str]:
+    logger.info("abracadabra")
+    try:
+        yield "please"
+    finally:
+        logger.info("alakazam")
+
+@tidi.inject
+def run(magic_word: tidi.Injected[str] = tidi.Provider(open_sesame)):
+    logger.info(f"the magic word is {magic_word}")
+
+if __name__ == "__main__":
+    run()  # 🪄 result from `open_sesame()` injected into `run` ✨
+```
+
 ### Or provided by instantiating a class
 
 ``` py

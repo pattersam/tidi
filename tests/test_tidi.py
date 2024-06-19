@@ -1,3 +1,5 @@
+import contextlib
+import typing as t
 from dataclasses import dataclass, field
 
 import pytest
@@ -84,6 +86,58 @@ def test_injecting_into_func_from_func():
         return f"{a} {b}"
 
     assert my_func("hello") == "hello loaded world"
+
+
+def test_injecting_into_func_from_decorator_context_manager():
+    class LoadedDependency(str):
+        ...
+
+    mutatable_var = {"state": "before_entering_context"}
+
+    @contextlib.contextmanager
+    def dependency_ctx_mgr(mutatable_arg: dict = mutatable_var) -> t.Iterator[LoadedDependency]:
+        mutatable_arg["state"] = "after_entering_context"
+        yield LoadedDependency("loaded world")
+        mutatable_arg["state"] = "after_exiting_context"
+
+    @tidi.inject
+    def my_func(
+        a: str, b: tidi.Injected[LoadedDependency] = tidi.Provider(dependency_ctx_mgr)
+    ) -> str:
+        assert mutatable_var["state"] == "after_entering_context"
+        return f"{a} {b}"
+
+    assert mutatable_var["state"] == "before_entering_context"
+    assert my_func("hello") == "hello loaded world"
+    assert mutatable_var["state"] == "after_exiting_context"
+
+
+def test_injecting_into_func_from_class_context_manager():
+    class LoadedDependency(str):
+        ...
+
+    class DependencyContextManager:
+        class_var = "before_enter"
+
+        @classmethod
+        def __enter__(cls):
+            cls.class_var = "after_enter_and_before_exit"
+            return LoadedDependency("loaded world")
+
+        @classmethod
+        def __exit__(cls, *_):
+            cls.class_var = "after_exit"
+
+    @tidi.inject
+    def my_func(
+        a: str, b: tidi.Injected[LoadedDependency] = tidi.Provider(DependencyContextManager)
+    ) -> str:
+        assert DependencyContextManager.class_var == "after_enter_and_before_exit"
+        return f"{a} {b}"
+
+    assert DependencyContextManager.class_var == "before_enter"
+    assert my_func("hello") == "hello loaded world"
+    assert DependencyContextManager.class_var == "after_exit"
 
 
 def test_injecting_into_func_from_initialised_class():

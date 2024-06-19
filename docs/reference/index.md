@@ -7,7 +7,7 @@ The top level import of `tidi` provides everything needed it's [primary intended
 * `tidi.inject` - a decorator that will replace certain keyword arguments with dependencies, based on their type & if they haven't been passed in
 * `tidi.Injected ` - a type alias, wrapping `typing.Annotated`, that indicates that a keyword argument should be injected
 * `tidi.register ` - a function that registers an object to be available for injection as a dependency
-* `tidi.Provider ` - a wrapper class around a function that will be called to provide a dependency
+* `tidi.Provider` - a wrapper class around a function or context manager that will be called to provide a dependency
 * `tidi.UNSET ` - a sentinel object to indicate that a dependency should be loaded from the registry
 * `tidi.field_factory` - a helper function for injecting dependencies into dataclass fields
 
@@ -43,9 +43,10 @@ See the [`tidi.registry`](./registry.md) documentation for more detail.
 
 ### `tidi.Provider`
 
-For more control over what instance is injected, use the provider function.
+For more control over what instance is injected, give a provider of the
+dependency as a function, or as a context manager.
 
-The elected provider function will be called each time the function is called.
+The given provider will be called each time the function is called.
 
 ``` py
 @tidi.inject

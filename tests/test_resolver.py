@@ -2,6 +2,7 @@ import contextlib
 import typing as t
 
 import pytest
+import pytest_mock
 
 from tidi import resolver
 
@@ -37,6 +38,14 @@ def provide_dep_func() -> Dep:
 @contextlib.contextmanager
 def provide_dep_from_context_manager() -> t.Iterator[Dep]:
     yield PROVIDED_DEP
+
+
+class ProviderContextManager:
+    def __enter__(self):
+        return PROVIDED_DEP
+
+    def __exit__(self, *_):
+        ...
 
 
 def test_resolve_dependency_from_registry_no_init():
@@ -95,7 +104,7 @@ def test_resolve_dependency_from_registry_or_init_without_dep_in_registry_from_p
     assert resolved_dep == PROVIDED_DEP
 
 
-def test_resolve_dependency_from_registry_or_init_without_dep_in_registry_from_provider_context_manager():
+def test_resolve_dependency_from_registry_or_init_without_dep_in_registry_from_provider_context_manager_decorator():
     # `case ResolverOptions(use_registry=True, initialise_missing=True) if registry is not None`
     resolved_dep = resolver.resolve_dependency(
         Dep,
@@ -104,6 +113,22 @@ def test_resolve_dependency_from_registry_or_init_without_dep_in_registry_from_p
         provider=provide_dep_from_context_manager,
     ).__enter__()
     assert resolved_dep == PROVIDED_DEP
+
+
+def test_resolve_dependency_from_registry_or_init_without_dep_in_registry_from_provider_context_manager_class(
+    mocker: pytest_mock.MockerFixture,
+):
+    # `case ResolverOptions(use_registry=True, initialise_missing=True) if registry is not None`
+    mock_exit = mocker.patch.object(ProviderContextManager, "__exit__")
+    with resolver.resolve_dependency(
+        Dep,
+        resolver.ResolverOptions(use_registry=True, initialise_missing=True),
+        registry=Registry(None),
+        provider=ProviderContextManager,
+    ) as resolved_dep:
+        assert resolved_dep == PROVIDED_DEP
+        mock_exit.assert_not_called()
+    mock_exit.assert_called_once()
 
 
 def test_resolve_dependency_from_registry_or_init_without_dep_in_registry_unable_to_create():
@@ -136,7 +161,7 @@ def test_resolve_dependency_init_only_from_provider_function():
     assert resolved_dep == PROVIDED_DEP
 
 
-def test_resolve_dependency_init_only_from_provider_context_manager():
+def test_resolve_dependency_init_only_from_provider_context_manager_decorator():
     # `case case ResolverOptions(initialise_missing=True) if registry is None`
     resolved_dep = resolver.resolve_dependency(
         Dep,
@@ -144,6 +169,22 @@ def test_resolve_dependency_init_only_from_provider_context_manager():
         provider=provide_dep_from_context_manager,
     ).__enter__()
     assert resolved_dep == PROVIDED_DEP
+
+
+def test_resolve_dependency_init_only_from_provider_context_manager_class(
+    mocker: pytest_mock.MockerFixture,
+):
+    # `case ResolverOptions(use_registry=True, initialise_missing=True) if registry is not None`
+    mock_exit = mocker.patch.object(ProviderContextManager, "__exit__")
+    with resolver.resolve_dependency(
+        Dep,
+        resolver.ResolverOptions(use_registry=True, initialise_missing=True),
+        registry=Registry(None),
+        provider=ProviderContextManager,
+    ) as resolved_dep:
+        assert resolved_dep == PROVIDED_DEP
+        mock_exit.assert_not_called()
+    mock_exit.assert_called_once()
 
 
 def test_resolve_dependency_init_only_unable_to_create():
